@@ -5,15 +5,11 @@ import {
     ScanCommand
 } from "https://esm.sh/@aws-sdk/client-dynamodb";
 
-import { load } from "https://deno.land/std@0.211.0/dotenv/mod.ts";
-
-const env = await load();
-
 const client = new DynamoDBClient({
     region: "eu-north-1",
     credentials: {
-        accessKeyId: env["AWS_ACCESS_KEY_ID"],
-        secretAccessKey: env["AWS_SECRET_ACCESS_KEY"],
+        accessKeyId: Deno.env.get("AWS_ACCESS_KEY_ID"),
+        secretAccessKey: Deno.env.get("AWS_SECRET_ACCESS_KEY"),
     },
 });
 
