@@ -1,0 +1,12 @@
+{
+  "tasks": {
+    "start": "deno run --allow-net server.ts"
+  },
+  "imports": {
+    "$gglmod.ts": "https://deno.land/x/gql@1.1.2/mod.ts",
+    "$graphqltoolsmod.ts": "https://deno.land/x/graphql_tools@0.0.2/mod.ts",
+    "$graphqltagmod.ts": "https://deno.land/x/graphql_tag@0.0.1/mod.ts",
+    "$stdhttp/": "https://deno.land/std@0.166.0/http/",
+    "client_dynamodb": "https://esm.sh/@aws-sdk/client-dynamodb"
+  }
+}
