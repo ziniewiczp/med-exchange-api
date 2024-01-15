@@ -3,7 +3,7 @@ import {
     GetItemCommand,
     PutItemCommand,
     ScanCommand
-} from "https://esm.sh/@aws-sdk/client-dynamodb";
+} from "client_dynamodb";
 
 const client = new DynamoDBClient({
     region: "eu-north-1",

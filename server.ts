@@ -1,6 +1,6 @@
-import { Server } from "https://deno.land/std@0.166.0/http/server.ts";
-import { GraphQLHTTP } from "https://deno.land/x/gql@1.1.2/mod.ts";
-import { makeExecutableSchema } from "https://deno.land/x/graphql_tools@0.0.2/mod.ts";
+import { Server } from "$stdhttp/server.ts";
+import { GraphQLHTTP } from "$gglmod.ts";
+import { makeExecutableSchema } from "$graphqltoolsmod.ts";
 import { resolvers } from "./resolvers.ts";
 import { typeDefs } from "./typedefs.ts";
 
