@@ -1,7 +1,7 @@
 import { Server } from "$stdhttp/server.ts";
 import { GraphQLHTTP } from "$gglmod.ts";
 import { makeExecutableSchema } from "$graphqltoolsmod.ts";
-import { resolvers } from "./resolvers.ts";
+import { resolvers } from "./resolvers/index.ts";
 import { typeDefs } from "./typedefs.ts";
 
 const schema = makeExecutableSchema({ resolvers, typeDefs });
