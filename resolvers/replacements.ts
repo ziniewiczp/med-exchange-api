@@ -15,7 +15,7 @@ const client = new DynamoDBClient({
   },
 });
 
-const allReplacements = async () => {
+const replacements = async () => {
   try {
     const response = await client.send(
       new ScanCommand({
@@ -25,7 +25,13 @@ const allReplacements = async () => {
 
     if (response?.Items) {
       return response.Items.map((item: any) => {
-        return { id: item.id.N }
+        return {
+          id: item.id.N,
+          startDate: item.startDate.S,
+          endDate: item.endDate.S,
+          status: item.status.S,
+          numberOfEmployees: item.numberOfEmployees.N
+        }
       });
 
     } else {
@@ -36,7 +42,7 @@ const allReplacements = async () => {
   }
 };
 
-const oneReplacement = async (args: any) => {
+const replacement = async (args: any) => {
   try {
     const { Item } = await client.send(
       new GetItemCommand({
@@ -48,8 +54,12 @@ const oneReplacement = async (args: any) => {
     );
 
     if (Item) {
-      return {
-        id: Item.id.N
+      return{
+        id: Item.id.N,
+        startDate: Item.startDate.S,
+        endDate: Item.endDate.S,
+        status: Item.status.S,
+        numberOfEmployees: Item.numberOfEmployees.N
       };
 
     } else {
@@ -69,7 +79,11 @@ const addReplacement = async (args: any) => {
         TableName: TABLE_NAME,
         Item: {
           id: { N: `${args.id}` },
-s        },
+          startDate: { S: args.startDate },
+          endDate: { S: args.endDate },
+          status: { S: args.status },
+          numberOfEmployees: { N: `${args.numberOfEmployees}` },
+        },
       }),
     );
 
@@ -87,8 +101,8 @@ s        },
 
 export const resolvers = {
   Query: {
-    allReplacements: () => allReplacements(),
-    oneReplacement: (_: any, args: any) => oneReplacement(args),
+    replacements: () => replacements(),
+    replacement: (_: any, args: any) => replacement(args),
   },
   Mutation: {
     addReplacement: (_: any, args: any) => addReplacement(args),
