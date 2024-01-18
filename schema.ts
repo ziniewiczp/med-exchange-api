@@ -1,24 +1,41 @@
 import { gql } from "$graphqltagmod.ts";
 
 export const typeDefs = gql`
+    enum Status {
+        FINISHED,
+        PENDING,
+        CANCELED,
+        FOUND
+    }
+    
     type User {
         id: Int
         name: String
     }
 
     type Replacement {
-        id: Int
+        id: ID,
+        startDate: String,
+        endDate: String,
+        status: Status,
+        numberOfEmployees: Int
     }
 
     type Mutation {
         addUser(id: Int, name: String): User
-        addReplacement(id: Int): Replacement
+        addReplacement(
+            id: Int, 
+            startDate: String, 
+            endDate: String, 
+            status: Status, 
+            numberOfEmployees: Int
+        ): Replacement
     }
 
     type Query {
         allUsers: [User]
         oneUser(id: Int): User
-        allReplacements: [Replacement]
-        oneReplacement(id: Int): Replacement
+        replacements: [Replacement]
+        replacement(id: Int): Replacement
     }
 `;
