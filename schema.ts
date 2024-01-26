@@ -9,9 +9,16 @@ export const typeDefs = gql`
     }
     
     type User {
-        id: Int
-        name: String
+        id: String!,
+        password: String!,
+        email: String!
     }
+    
+    type EmailAlreadyUsed {
+        message: String!
+    }
+    
+    union UserResult = User | EmailAlreadyUsed
 
     type Replacement {
         id: ID,
@@ -23,7 +30,8 @@ export const typeDefs = gql`
     }
 
     type Mutation {
-        addUser(id: Int, name: String): User
+        addUser(id: Int, email: String): User
+        register(email: String, password: String): UserResult!
         addReplacement(
             id: Int, 
             startDate: String, 
@@ -40,3 +48,14 @@ export const typeDefs = gql`
         replacement(id: Int): Replacement
     }
 `;
+
+
+// mutation Register($email: String!, $password: String!) {
+//     register(email: $email, password: $password) {
+//     ... on EmailAlreadyUsed {
+//             message
+//         }
+//     ... on User {
+//             id
+//         }}
+// }

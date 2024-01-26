@@ -8,6 +8,7 @@
     "$graphqltagmod.ts": "https://deno.land/x/graphql_tag@0.0.1/mod.ts",
     "$stdhttp/": "https://deno.land/std@0.166.0/http/",
     "client_dynamodb": "https://esm.sh/@aws-sdk/client-dynamodb",
-    "cors": "https://deno.land/x/edge_cors@0.2.1/src/cors.ts"
+    "cors": "https://deno.land/x/edge_cors@0.2.1/src/cors.ts",
+    "djwt": "https://deno.land/x/djwt@3.0.1/mod.ts"
   }
 }

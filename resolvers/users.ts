@@ -4,6 +4,9 @@ import {
   PutItemCommand,
   ScanCommand
 } from "client_dynamodb";
+import { RegisterUserResponse, RegisterUserBody } from "./userModel.ts";
+import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
+import * as uuid from "https://deno.land/std@0.207.0/uuid/mod.ts";
 
 const client = new DynamoDBClient({
   region: "eu-north-1",
@@ -23,7 +26,7 @@ const allUsers = async () => {
 
     if (response?.Items) {
       return response.Items.map((item: any) => {
-        return { id: item.id.N, name: item.name.S }
+        return { id: item.id.S, email: item.email.S }
       });
 
     } else {
@@ -40,15 +43,15 @@ const oneUser = async (args: any) => {
       new GetItemCommand({
         TableName: "Users",
         Key: {
-          id: { N: `${args.id}` },
+          id: { S: `${args.id}` },
         },
       }),
     );
 
     if (Item) {
       return {
-        id: Item.id.N,
-        name: Item.name.S
+        id: Item.id.S,
+        email: Item.email.S
       };
 
     } else {
@@ -67,8 +70,8 @@ const addUser = async (args: any) => {
       new PutItemCommand({
         TableName: "Users",
         Item: {
-          id: { N: `${args.id}` },
-          name: { S: args.name }
+          id: { S: `${args.id}` },
+          email: { S: args.email }
         },
       }),
     );
@@ -85,6 +88,52 @@ const addUser = async (args: any) => {
   }
 }
 
+const register = async ({ email, password }: RegisterUserBody): Promise<RegisterUserResponse | undefined> => {
+  try {
+    const users = await client.send(
+      new ScanCommand({
+        TableName: "Users",
+      })
+    );
+
+    const isEmailUsed = users?.Items?.find((item: any) => {
+      return item.email.S === email
+    });
+
+    if (isEmailUsed) {
+      return {
+        __typename: "EmailAlreadyUsed",
+        message: `Email ${email} is already used`
+      };
+    }
+
+    const hashedPassword = await bcrypt.hash(password);
+    const id = uuid.v1.generate() as string;
+
+    const {
+      $metadata: { httpStatusCode },
+    } = await client.send(
+      new PutItemCommand({
+        TableName: "Users",
+        Item: {
+          id: { S: id },
+          email: { S: email },
+          password: { S: hashedPassword }
+        },
+      }),
+    );
+
+    if (httpStatusCode === 200) {
+      return {
+        __typename: "User",
+        id
+      };
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 export const resolvers = {
   Query: {
     allUsers: () => allUsers(),
@@ -92,5 +141,6 @@ export const resolvers = {
   },
   Mutation: {
     addUser: (_: any, args: any) => addUser(args),
+    register: (_: any, args: RegisterUserBody) => register(args),
   },
 };
