@@ -18,7 +18,8 @@ export const typeDefs = gql`
         startDate: String,
         endDate: String,
         status: Status,
-        numberOfEmployees: Int
+        numberOfEmployees: Int,
+        ownerId: Int,
     }
 
     type Mutation {

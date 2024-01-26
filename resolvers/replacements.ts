@@ -30,7 +30,8 @@ const replacements = async () => {
           startDate: item.startDate.S,
           endDate: item.endDate.S,
           status: item.status.S,
-          numberOfEmployees: item.numberOfEmployees.N
+          numberOfEmployees: item.numberOfEmployees.N,
+          ownerId: item.ownerId?.N ?? null,
         }
       });
 
@@ -59,7 +60,8 @@ const replacement = async (args: any) => {
         startDate: Item.startDate.S,
         endDate: Item.endDate.S,
         status: Item.status.S,
-        numberOfEmployees: Item.numberOfEmployees.N
+        numberOfEmployees: Item.numberOfEmployees.N,
+        ownerId: Item.ownerId?.N ?? null,
       };
 
     } else {
