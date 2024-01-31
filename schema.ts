@@ -10,8 +10,10 @@ export const typeDefs = gql`
     
     type User {
         id: String!,
-        password: String!,
-        email: String!
+        email: String!,
+        updatedAt: String!,
+        createdAt: String!,
+        password: String,
     }
     
     type EmailAlreadyUsed {
@@ -43,7 +45,7 @@ export const typeDefs = gql`
 
     type Query {
         allUsers: [User]
-        oneUser(id: Int): User
+        oneUser(id: String): User
         replacements: [Replacement]
         replacement(id: Int): Replacement
     }

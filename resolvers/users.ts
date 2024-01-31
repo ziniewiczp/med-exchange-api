@@ -1,4 +1,4 @@
-import { RegisterUserResponse, RegisterUserBody } from "./userModel.ts";
+import {RegisterUserResponse, RegisterUserBody, GetUserBody} from "./userModel.ts";
 
 import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
 import { MongoDB } from "../db/mongo.ts";
@@ -40,30 +40,42 @@ const allUsers = async () => {
   //   console.error(error);
   // }
 };
-
-const oneUser = async (args: any) => {
-  // try {
-  //   const { Item } = await client.send(
-  //     new GetItemCommand({
-  //       TableName: "Users",
-  //       Key: {
-  //         id: { S: `${args.id}` },
-  //       },
-  //     }),
-  //   );
-  //
-  //   if (Item) {
-  //     return {
-  //       id: Item.id.S,
-  //       email: Item.email.S
-  //     };
-  //
-  //   } else {
-  //     throw new Error('Received undefined result from the database')
-  //   }
-  // } catch (error) {
-  //   console.error(error);
-  // }
+// 65ba944c9f38851bdc93bea3
+const oneUser = async ({ id }: GetUserBody) => {
+  try {
+    await client.connect();
+    const userFromMongoDb = await User.findById(id);
+    return {
+      email: userFromMongoDb.email,
+      id: userFromMongoDb.id,
+      createdAt: userFromMongoDb.createdAt,
+      updatedAt: userFromMongoDb.updatedAt
+    };
+  } catch (e) {
+    console.log(e);
+  }
+//   try {
+//     const { Item } = await client.send(
+//       new GetItemCommand({
+//         TableName: "Users",
+//         Key: {
+//           id: { S: `${args.id}` },
+//         },
+//       }),
+//     );
+//
+//     if (Item) {
+//       return {
+//         id: Item.id.S,
+//         email: Item.email.S
+//       };
+//
+//     } else {
+//       throw new Error('Received undefined result from the database')
+//     }
+//   } catch (error) {
+//     console.error(error);
+//   }
 };
 
 const addUser = async (args: any) => {

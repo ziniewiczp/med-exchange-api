@@ -10,3 +10,7 @@ export type RegisterUserResponse = {
   __typename: string,
   message: string
 }
+
+export interface GetUserBody {
+  id: string
+}
