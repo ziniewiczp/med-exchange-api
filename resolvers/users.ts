@@ -1,104 +1,103 @@
-import {
-  DynamoDBClient,
-  GetItemCommand,
-  PutItemCommand,
-  ScanCommand
-} from "client_dynamodb";
 import { RegisterUserResponse, RegisterUserBody } from "./userModel.ts";
-import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
-import * as uuid from "https://deno.land/std@0.207.0/uuid/mod.ts";
 
-const client = new DynamoDBClient({
-  region: "eu-north-1",
-  credentials: {
-    accessKeyId: Deno.env.get("AWS_ACCESS_KEY_ID"),
-    secretAccessKey: Deno.env.get("AWS_SECRET_ACCESS_KEY"),
-  },
-});
+import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
+import { MongoDB } from "../db/mongo.ts";
+import User from "../db/models/User.ts";
+
+const client = new MongoDB();
 
 const allUsers = async () => {
-  try {
-    const response = await client.send(
-      new ScanCommand({
-        TableName: "Users",
-      })
-    );
+  await client.connect();
+  const user = new User({
+    email: "pfrancza@interia.pl",
+    password: "Haslo123"
+  });
 
-    if (response?.Items) {
-      return response.Items.map((item: any) => {
-        return { id: item.id.S, email: item.email.S }
-      });
+  console.log(user)
 
-    } else {
-      throw new Error('Received undefined result from the database');
-    }
-  } catch (error) {
-    console.error(error);
-  }
+  await user.save();
+  console.log('save');
+  const userFromMongoDb = await User.findOne({ email: "pfrancza@interia.pl" });
+  console.log(
+    `Finding User in MongoDB -- \n  ${userFromMongoDb?.email}`,
+  );
+  // try {
+  //   const response = await client.send(
+  //     new ScanCommand({
+  //       TableName: "Users",
+  //     })
+  //   );
+  //
+  //   if (response?.Items) {
+  //     return response.Items.map((item: any) => {
+  //       return { id: item.id.S, email: item.email.S }
+  //     });
+  //
+  //   } else {
+  //     throw new Error('Received undefined result from the database');
+  //   }
+  // } catch (error) {
+  //   console.error(error);
+  // }
 };
 
 const oneUser = async (args: any) => {
-  try {
-    const { Item } = await client.send(
-      new GetItemCommand({
-        TableName: "Users",
-        Key: {
-          id: { S: `${args.id}` },
-        },
-      }),
-    );
-
-    if (Item) {
-      return {
-        id: Item.id.S,
-        email: Item.email.S
-      };
-
-    } else {
-      throw new Error('Received undefined result from the database')
-    }
-  } catch (error) {
-    console.error(error);
-  }
+  // try {
+  //   const { Item } = await client.send(
+  //     new GetItemCommand({
+  //       TableName: "Users",
+  //       Key: {
+  //         id: { S: `${args.id}` },
+  //       },
+  //     }),
+  //   );
+  //
+  //   if (Item) {
+  //     return {
+  //       id: Item.id.S,
+  //       email: Item.email.S
+  //     };
+  //
+  //   } else {
+  //     throw new Error('Received undefined result from the database')
+  //   }
+  // } catch (error) {
+  //   console.error(error);
+  // }
 };
 
 const addUser = async (args: any) => {
-  try {
-    const {
-      $metadata: { httpStatusCode },
-    } = await client.send(
-      new PutItemCommand({
-        TableName: "Users",
-        Item: {
-          id: { S: `${args.id}` },
-          email: { S: args.email }
-        },
-      }),
-    );
-
-    // On a successful put item request, dynamo returns a 200 status code (weird).
-    // So we test status code to verify if the data has been inserted and respond
-    // with the data provided by the request as a confirmation.
-    if (httpStatusCode === 200) {
-      return JSON.stringify({ status: 201 });
-    }
-
-  } catch (error) {
-    console.error(error);
-  }
+  // try {
+  //   const {
+  //     $metadata: { httpStatusCode },
+  //   } = await client.send(
+  //     new PutItemCommand({
+  //       TableName: "Users",
+  //       Item: {
+  //         id: { S: `${args.id}` },
+  //         email: { S: args.email }
+  //       },
+  //     }),
+  //   );
+  //
+  //   // On a successful put item request, dynamo returns a 200 status code (weird).
+  //   // So we test status code to verify if the data has been inserted and respond
+  //   // with the data provided by the request as a confirmation.
+  //   if (httpStatusCode === 200) {
+  //     return JSON.stringify({ status: 201 });
+  //   }
+  //
+  // } catch (error) {
+  //   console.error(error);
+  // }
 }
 
 const register = async ({ email, password }: RegisterUserBody): Promise<RegisterUserResponse | undefined> => {
   try {
-    const users = await client.send(
-      new ScanCommand({
-        TableName: "Users",
-      })
-    );
+    await client.connect();
 
-    const isEmailUsed = users?.Items?.find((item: any) => {
-      return item.email.S === email
-    });
+    const userFromMongoDb = await User.findOne({ email });
+    const isEmailUsed = !!userFromMongoDb;
 
     if (isEmailUsed) {
       return {
@@ -108,25 +107,17 @@ const register = async ({ email, password }: RegisterUserBody): Promise<Register
     }
 
     const hashedPassword = await bcrypt.hash(password);
-    const id = uuid.v1.generate() as string;
 
-    const {
-      $metadata: { httpStatusCode },
-    } = await client.send(
-      new PutItemCommand({
-        TableName: "Users",
-        Item: {
-          id: { S: id },
-          email: { S: email },
-          password: { S: hashedPassword }
-        },
-      }),
-    );
+    const user = new User({
+      email,
+      password: hashedPassword
+    });
 
-    if (httpStatusCode === 200) {
+    const createdUser = await user.save();
+    if (createdUser === user) {
       return {
         __typename: "User",
-        id
+        id: user.id
       };
     }
   } catch (error) {
