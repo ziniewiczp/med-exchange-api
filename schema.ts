@@ -32,7 +32,6 @@ export const typeDefs = gql`
     }
 
     type Mutation {
-        addUser(id: Int, email: String): User
         register(email: String, password: String): UserResult!
         addReplacement(
             id: Int, 
