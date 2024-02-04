@@ -19,6 +19,19 @@ export type RegisterUserResponse = {
   message: string
 }
 
+export interface LoginUserBody {
+  email: string,
+  password: string
+}
+
+export type LoginUserResponse = {
+  __typename: string,
+  token: string
+} | {
+  __typename: string,
+  message: string
+}
+
 export interface GetUserBody {
   id: string
 }

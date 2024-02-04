@@ -7,6 +7,7 @@ export class MongoDB {
   public async connect() {
     try {
       // Create a Mongoose client with a MongoClientOptions object to set the Stable API version
+      mongoose.set('debug', { color: false });
       await mongoose.connect(this.uri, this.clientOptions);
       await mongoose.connection.db.admin().command({ping: 1});
       console.log("Pinged your deployment. You successfully connected to MongoDB!");

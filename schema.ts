@@ -22,17 +22,29 @@ export const typeDefs = gql`
     
     union UserResult = User | EmailAlreadyUsed
 
+
+    type SuccessfulAuthentication {
+        token: String!
+    }
+
+    type FailedAuthentication {
+        message: String!
+    }
+    
+    union LoginResult = SuccessfulAuthentication | FailedAuthentication
+
     type Replacement {
-        id: ID,
-        startDate: String,
-        endDate: String,
-        status: Status,
+        id: String!,
+        startDate: String!,
+        endDate: String!,
+        status: Status!,
         numberOfEmployees: Int,
-        ownerId: Int,
+        ownerId: Int!,
     }
 
     type Mutation {
         register(email: String, password: String): UserResult!
+        login(email: String, password: String): LoginResult!
         addReplacement(
             id: Int, 
             startDate: String, 

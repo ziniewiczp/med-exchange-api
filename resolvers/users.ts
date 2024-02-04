@@ -5,11 +5,14 @@ import {
   GetUserResponse,
   GetUsersResponse,
   User as TUser,
+  LoginUserBody,
 } from "./userModel.ts";
 
 import * as bcrypt from "https://deno.land/x/bcrypt/mod.ts";
 import { MongoDB } from "../db/mongo.ts";
 import User from "../db/models/User.ts";
+import {LoginUserResponse} from "./userModel.ts";
+import jwt from 'jwt';
 
 const client = new MongoDB();
 
@@ -77,6 +80,44 @@ const register = async ({ email, password }: RegisterUserBody): Promise<Register
   }
 }
 
+const login = async ({ email, password }: LoginUserBody): Promise<LoginUserResponse | undefined> => {
+  try {
+    await client.connect();
+    const user = await User.findOne({ email });
+    console.log(user);
+    if (!user) {
+      return {
+        __typename: "FailedAuthentication",
+        message: `Authentication failed`
+      };
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    console.log(user.password, password)
+    if (!passwordMatch) {
+      return {
+        __typename: "FailedAuthentication",
+        message: `Authentication failed`
+      };
+    }
+
+    const token = jwt.sign({ userId: user._id }, Deno.env.get("JWT_SECRET_KEY"), {
+      expiresIn: '1h',
+    });
+
+    return {
+      __typename: "SuccessfulAuthentication",
+      token
+    }
+
+  } catch (e) {
+    return {
+      __typename: "FailedAuthentication",
+      message: `Authentication failed`
+    };
+  }
+}
+
 export const resolvers = {
   Query: {
     allUsers: () => allUsers(),
@@ -84,5 +125,6 @@ export const resolvers = {
   },
   Mutation: {
     register: (_: any, args: RegisterUserBody) => register(args),
+    login: (_: any, args: LoginUserBody) => login(args),
   },
 };
